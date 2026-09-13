@@ -198,7 +198,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="-150.0"
                     android:valueTo="150.0"
-                    android:stepSize="1.0"
                     android:value="0.0" />
 
                 <!-- Slider 2: Y Offset -->
@@ -217,7 +216,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="-150.0"
                     android:valueTo="150.0"
-                    android:stepSize="1.0"
                     android:value="0.0" />
 
                 <!-- Slider 3: Cutout Radius -->
@@ -236,7 +234,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="10.0"
                     android:valueTo="35.0"
-                    android:stepSize="0.5"
                     android:value="18.0" />
 
                 <!-- Slider 4: Ring Thickness -->
@@ -255,7 +252,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="1.5"
                     android:valueTo="10.0"
-                    android:stepSize="0.5"
                     android:value="3.5" />
 
                 <!-- Slider 5: Ring Gap -->
@@ -274,7 +270,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="0.0"
                     android:valueTo="15.0"
-                    android:stepSize="0.5"
                     android:value="3.0" />
 
                 <!-- Slider 6: Dot Distance -->
@@ -293,7 +288,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="15.0"
                     android:valueTo="50.0"
-                    android:stepSize="0.5"
                     android:value="27.0" />
 
                 <!-- Slider 7: Dot Size -->
@@ -312,7 +306,6 @@
                     android:layout_height="wrap_content"
                     android:valueFrom="1.5"
                     android:valueTo="7.0"
-                    android:stepSize="0.5"
                     android:value="3.5" />
 
                 <!-- Reset Button -->

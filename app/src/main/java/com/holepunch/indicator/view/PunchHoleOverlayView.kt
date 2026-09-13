@@ -55,30 +55,28 @@ class PunchHoleOverlayView @JvmOverloads constructor(
     private val arcRect = RectF()
 
     init {
-        // Transparent background
         setBackgroundColor(Color.TRANSPARENT)
     }
 
     fun updateState(newState: IndicatorState) {
         this.state = newState
-        invalidate()
+        postInvalidate()
     }
 
     fun notifySettingsChanged() {
-        invalidate()
+        postInvalidate()
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val cutout = insets.displayCutout
             if (cutout != null && cutout.boundingRects.isNotEmpty()) {
-                // Find top cutout (most common for front hole-punch camera)
                 val rect = cutout.boundingRects.minByOrNull { it.top } ?: cutout.boundingRects[0]
                 autoCenterX = rect.centerX().toFloat()
                 autoCenterY = rect.centerY().toFloat()
                 autoRadius = max(rect.width(), rect.height()) / 2f
                 hasDetectedCutout = true
-                invalidate()
+                postInvalidate()
             }
         }
         return super.onApplyWindowInsets(insets)
@@ -87,8 +85,7 @@ class PunchHoleOverlayView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Fallback center if cutout API not detected: top center of screen
-        val fallbackX = width / 2f
+        val fallbackX = if (width > 0) width / 2f else 540f
         val fallbackY = dpToPx(28f)
 
         val baseCenterX = if (hasDetectedCutout) autoCenterX else fallbackX
@@ -109,18 +106,14 @@ class PunchHoleOverlayView @JvmOverloads constructor(
 
         // 1. Draw Optional Test / Calibration Guide
         if (prefs.isTestMode || state.isTestMode) {
-            guidePaint.color = Color.parseColor("#E91E63") // Vibrant Pink
+            guidePaint.color = Color.parseColor("#E91E63")
             canvas.drawCircle(cx, cy, cutoutRadius, guidePaint)
-            guidePaint.color = Color.parseColor("#00E5FF") // Cyan
+            guidePaint.color = Color.parseColor("#00E5FF")
             canvas.drawLine(cx - cutoutRadius * 1.5f, cy, cx + cutoutRadius * 1.5f, cy, guidePaint)
             canvas.drawLine(cx, cy - cutoutRadius * 1.5f, cx, cy + cutoutRadius * 1.5f, guidePaint)
         }
 
         // 2. Battery Track & Progress Arc
-        // In the design, the arc leaves an opening at the bottom for the status dots.
-        // Clock coordinate system: 0 deg = 3 o'clock, 90 deg = 6 o'clock (bottom), 180 deg = 9 o'clock, 270 deg = 12 o'clock (top).
-        // Let's reserve bottom 90 degrees (from 45 deg to 135 deg) for the dots.
-        // Arc starts at 135 degrees and sweeps 270 degrees clockwise to 45 degrees.
         val startAngle = 135f
         val maxSweepAngle = 270f
 
@@ -146,18 +139,15 @@ class PunchHoleOverlayView @JvmOverloads constructor(
         }
 
         // 3. Status Dots Along Lower Arc Contour
-        // Dots sit along the bottom arc under the camera hole.
         val dotDistance = dpToPx(prefs.dotDistanceDp)
         val dotRadius = dpToPx(prefs.dotRadiusDp)
-        val dotSpread = prefs.dotSpreadAngle // default e.g. 75 degrees total
+        val dotSpread = prefs.dotSpreadAngle
 
-        // 4 dots: [0]=Wi-Fi, [1]=Cellular, [2]=Bluetooth, [3]=Silent/DND
         val dotCount = 4
-        val centerBottomAngle = 90.0 // 90 degrees = straight down
+        val centerBottomAngle = 90.0
         val halfSpread = dotSpread / 2.0
         val angleStep = if (dotCount > 1) dotSpread / (dotCount - 1) else 0f
 
-        // Define status color pairs (Active color, Inactive color, is active flag)
         val dotsData = listOf(
             Triple(R.color.dot_wifi_active, R.color.dot_wifi_inactive, state.isWifiConnected),
             Triple(R.color.dot_cellular_active, R.color.dot_cellular_inactive, state.isCellularConnected),
@@ -166,8 +156,6 @@ class PunchHoleOverlayView @JvmOverloads constructor(
         )
 
         for (i in 0 until dotCount) {
-            // Angle from left to right across the bottom: (90 + halfSpread) down to (90 - halfSpread)
-            // Or from 135 deg toward 45 deg
             val currentAngleDeg = (centerBottomAngle + halfSpread) - (i * angleStep)
             val rad = Math.toRadians(currentAngleDeg)
 

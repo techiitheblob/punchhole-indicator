@@ -42,21 +42,37 @@ class MainActivity : AppCompatActivity() {
     private fun setupPermissionButtons() {
         binding.btnOverlayPermission.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:")
-                )
-                startActivity(intent)
+                try {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + packageName)
+                    )
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    try {
+                        startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+                    } catch (e2: Exception) {
+                        Toast.makeText(this, "Could not open overlay settings", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
         binding.btnBatteryOpt.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val intent = Intent(
-                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                    Uri.parse("package:")
-                )
-                startActivity(intent)
+                try {
+                    val intent = Intent(
+                        Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                        Uri.parse("package:" + packageName)
+                    )
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    try {
+                        startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                    } catch (e2: Exception) {
+                        Toast.makeText(this, "Could not open battery settings", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
@@ -129,17 +145,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startOverlayService() {
-        val intent = Intent(this, HolePunchOverlayService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        try {
+            val intent = Intent(this, HolePunchOverlayService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to start service: " + e.localizedMessage, Toast.LENGTH_LONG).show()
         }
     }
 
     private fun stopOverlayService() {
-        val intent = Intent(this, HolePunchOverlayService::class.java)
-        stopService(intent)
+        try {
+            val intent = Intent(this, HolePunchOverlayService::class.java)
+            stopService(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun setupCalibrationSliders() {
@@ -152,64 +177,64 @@ class MainActivity : AppCompatActivity() {
 
         // Slider X
         binding.sliderOffsetX.value = prefs.offsetX.coerceIn(-150f, 150f)
-        binding.labelOffsetX.text = "Center X Offset:  px"
+        binding.labelOffsetX.text = "Center X Offset: " + prefs.offsetX.toInt() + " px"
         binding.sliderOffsetX.addOnChangeListener { _, value, _ ->
             prefs.offsetX = value
-            binding.labelOffsetX.text = "Center X Offset:  px"
+            binding.labelOffsetX.text = "Center X Offset: " + value.toInt() + " px"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 
         // Slider Y
         binding.sliderOffsetY.value = prefs.offsetY.coerceIn(-150f, 150f)
-        binding.labelOffsetY.text = "Center Y Offset:  px"
+        binding.labelOffsetY.text = "Center Y Offset: " + prefs.offsetY.toInt() + " px"
         binding.sliderOffsetY.addOnChangeListener { _, value, _ ->
             prefs.offsetY = value
-            binding.labelOffsetY.text = "Center Y Offset:  px"
+            binding.labelOffsetY.text = "Center Y Offset: " + value.toInt() + " px"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 
         // Slider Cutout Radius
         binding.sliderRadius.value = prefs.cutoutRadiusDp.coerceIn(10f, 35f)
-        binding.labelRadius.text = "Camera Cutout Radius:  dp"
+        binding.labelRadius.text = "Camera Cutout Radius: " + String.format("%.1f", prefs.cutoutRadiusDp) + " dp"
         binding.sliderRadius.addOnChangeListener { _, value, _ ->
             prefs.cutoutRadiusDp = value
-            binding.labelRadius.text = "Camera Cutout Radius:  dp"
+            binding.labelRadius.text = "Camera Cutout Radius: " + String.format("%.1f", value) + " dp"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 
         // Slider Ring Thickness
         binding.sliderThickness.value = prefs.ringThicknessDp.coerceIn(1.5f, 10f)
-        binding.labelThickness.text = "Ring Thickness:  dp"
+        binding.labelThickness.text = "Ring Thickness: " + String.format("%.1f", prefs.ringThicknessDp) + " dp"
         binding.sliderThickness.addOnChangeListener { _, value, _ ->
             prefs.ringThicknessDp = value
-            binding.labelThickness.text = "Ring Thickness:  dp"
+            binding.labelThickness.text = "Ring Thickness: " + String.format("%.1f", value) + " dp"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 
         // Slider Ring Gap
         binding.sliderGap.value = prefs.ringGapDp.coerceIn(0f, 15f)
-        binding.labelGap.text = "Ring Gap:  dp"
+        binding.labelGap.text = "Ring Gap: " + String.format("%.1f", prefs.ringGapDp) + " dp"
         binding.sliderGap.addOnChangeListener { _, value, _ ->
             prefs.ringGapDp = value
-            binding.labelGap.text = "Ring Gap:  dp"
+            binding.labelGap.text = "Ring Gap: " + String.format("%.1f", value) + " dp"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 
         // Slider Dot Distance
         binding.sliderDotDistance.value = prefs.dotDistanceDp.coerceIn(15f, 50f)
-        binding.labelDotDistance.text = "Dot Distance:  dp"
+        binding.labelDotDistance.text = "Dot Distance: " + String.format("%.1f", prefs.dotDistanceDp) + " dp"
         binding.sliderDotDistance.addOnChangeListener { _, value, _ ->
             prefs.dotDistanceDp = value
-            binding.labelDotDistance.text = "Dot Distance:  dp"
+            binding.labelDotDistance.text = "Dot Distance: " + String.format("%.1f", value) + " dp"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 
         // Slider Dot Radius
         binding.sliderDotRadius.value = prefs.dotRadiusDp.coerceIn(1.5f, 7f)
-        binding.labelDotRadius.text = "Dot Size:  dp"
+        binding.labelDotRadius.text = "Dot Size: " + String.format("%.1f", prefs.dotRadiusDp) + " dp"
         binding.sliderDotRadius.addOnChangeListener { _, value, _ ->
             prefs.dotRadiusDp = value
-            binding.labelDotRadius.text = "Dot Size:  dp"
+            binding.labelDotRadius.text = "Dot Size: " + String.format("%.1f", value) + " dp"
             HolePunchOverlayService.instance?.notifySettingsChanged()
         }
 

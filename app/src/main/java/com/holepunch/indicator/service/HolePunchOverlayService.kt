@@ -13,6 +13,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
 import android.media.AudioManager
 import android.net.ConnectivityManager
@@ -20,11 +22,13 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
-import com.holepunch.indicator.R
+import androidx.core.content.ContextCompat
 import com.holepunch.indicator.model.IndicatorState
 import com.holepunch.indicator.ui.MainActivity
 import com.holepunch.indicator.view.PunchHoleOverlayView
@@ -33,6 +37,7 @@ class HolePunchOverlayService : Service() {
 
     private var windowManager: WindowManager? = null
     private var overlayView: PunchHoleOverlayView? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private var currentState = IndicatorState()
 
@@ -46,11 +51,13 @@ class HolePunchOverlayService : Service() {
                         status == BatteryManager.BATTERY_STATUS_FULL
 
                 val pct = if (level >= 0 && scale > 0) (level * 100) / scale else 50
-                currentState = currentState.copy(
-                    batteryPercent = pct,
-                    isCharging = isCharging
-                )
-                overlayView?.updateState(currentState)
+                mainHandler.post {
+                    currentState = currentState.copy(
+                        batteryPercent = pct,
+                        isCharging = isCharging
+                    )
+                    overlayView?.updateState(currentState)
+                }
             }
         }
     }
@@ -120,7 +127,24 @@ class HolePunchOverlayService : Service() {
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .build()
 
-        startForeground(NOTIFICATION_ID, notification)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                startForeground(NOTIFICATION_ID, notification)
+            } catch (e2: Exception) {
+                e2.printStackTrace()
+            }
+        }
     }
 
     @SuppressLint("RtlHardcoded")
@@ -162,11 +186,21 @@ class HolePunchOverlayService : Service() {
     private fun registerMonitors() {
         // Battery
         val batteryFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        registerReceiver(batteryReceiver, batteryFilter)
+        ContextCompat.registerReceiver(
+            this,
+            batteryReceiver,
+            batteryFilter,
+            ContextCompat.RECEIVER_EXPORTED
+        )
 
         // Ringer / Silent
         val audioFilter = IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION)
-        registerReceiver(audioReceiver, audioFilter)
+        ContextCompat.registerReceiver(
+            this,
+            audioReceiver,
+            audioFilter,
+            ContextCompat.RECEIVER_EXPORTED
+        )
         updateRingerState()
 
         // Bluetooth
@@ -175,7 +209,12 @@ class HolePunchOverlayService : Service() {
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         }
-        registerReceiver(bluetoothReceiver, btFilter)
+        ContextCompat.registerReceiver(
+            this,
+            bluetoothReceiver,
+            btFilter,
+            ContextCompat.RECEIVER_EXPORTED
+        )
         updateBluetoothState()
 
         // Network (Wi-Fi & Cellular)
@@ -189,15 +228,19 @@ class HolePunchOverlayService : Service() {
                         capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
                 val hasCellular = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 
-                currentState = currentState.copy(
-                    isWifiConnected = hasWifi,
-                    isCellularConnected = hasCellular
-                )
-                overlayView?.updateState(currentState)
+                mainHandler.post {
+                    currentState = currentState.copy(
+                        isWifiConnected = hasWifi,
+                        isCellularConnected = hasCellular
+                    )
+                    overlayView?.updateState(currentState)
+                }
             }
 
             override fun onLost(network: Network) {
-                checkNetworkFallback()
+                mainHandler.post {
+                    checkNetworkFallback()
+                }
             }
         }
 
@@ -223,22 +266,44 @@ class HolePunchOverlayService : Service() {
     }
 
     private fun updateRingerState() {
-        val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-        val isSilentOrVibrate = am?.ringerMode != AudioManager.RINGER_MODE_NORMAL
-        currentState = currentState.copy(isSilentOrVibrate = isSilentOrVibrate)
-        overlayView?.updateState(currentState)
+        try {
+            val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            val isSilentOrVibrate = am?.ringerMode != AudioManager.RINGER_MODE_NORMAL
+            mainHandler.post {
+                currentState = currentState.copy(isSilentOrVibrate = isSilentOrVibrate)
+                overlayView?.updateState(currentState)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun updateBluetoothState() {
-        val bm = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        val adapter = bm?.adapter
-        val isConnected = adapter?.isEnabled == true
-        currentState = currentState.copy(isBluetoothConnected = isConnected)
-        overlayView?.updateState(currentState)
+        try {
+            val hasBtPerm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.BLUETOOTH_CONNECT
+                ) == PackageManager.PERMISSION_GRANTED
+            } else true
+
+            val bm = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+            val adapter = bm?.adapter
+            val isConnected = if (hasBtPerm) adapter?.isEnabled == true else false
+
+            mainHandler.post {
+                currentState = currentState.copy(isBluetoothConnected = isConnected)
+                overlayView?.updateState(currentState)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun notifySettingsChanged() {
-        overlayView?.notifySettingsChanged()
+        mainHandler.post {
+            overlayView?.notifySettingsChanged()
+        }
     }
 
     override fun onDestroy() {
@@ -256,7 +321,9 @@ class HolePunchOverlayService : Service() {
 
         if (overlayView != null && windowManager != null) {
             try {
-                windowManager?.removeView(overlayView)
+                if (overlayView?.isAttachedToWindow == true) {
+                    windowManager?.removeView(overlayView)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
