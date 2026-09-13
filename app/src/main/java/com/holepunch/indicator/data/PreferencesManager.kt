@@ -1,4 +1,4 @@
-﻿package com.holepunch.indicator.data
+package com.holepunch.indicator.data
 
 import android.content.Context
 import android.content.SharedPreferences

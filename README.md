@@ -1,4 +1,4 @@
-﻿# PunchHole Indicator 📱
+# PunchHole Indicator 📱
 
 An elegant Android status overlay that turns your hole-punch camera into a live status hub:
 - **Outer Circular Arc**: Real-time battery indicator with adaptive charging colors (green for charging, red for low battery, white/cyan for normal).

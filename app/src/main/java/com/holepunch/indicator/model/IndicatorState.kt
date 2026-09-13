@@ -1,4 +1,4 @@
-﻿package com.holepunch.indicator.model
+package com.holepunch.indicator.model
 
 data class IndicatorState(
     val batteryPercent: Int = 85,

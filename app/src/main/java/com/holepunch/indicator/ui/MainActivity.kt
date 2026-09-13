@@ -1,4 +1,4 @@
-﻿package com.holepunch.indicator.ui
+package com.holepunch.indicator.ui
 
 import android.Manifest
 import android.content.Context

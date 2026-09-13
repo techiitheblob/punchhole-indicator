@@ -1,4 +1,4 @@
-﻿package com.holepunch.indicator.view
+package com.holepunch.indicator.view
 
 import android.content.Context
 import android.graphics.Canvas

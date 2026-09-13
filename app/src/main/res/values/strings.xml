@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <string name="app_name">PunchHole Indicator</string>
     <string name="enable_service">Enable Indicator Overlay</string>
     <string name="enable_service_desc">Draw status rings and dots around camera cutout</string>
@@ -9,7 +9,7 @@
     <string name="bluetooth_perm_btn">Bluetooth Permission (Optional)</string>
     
     <string name="calibration_title">Camera Cutout Calibration</string>
-    <string name="calibration_desc">Adjust position and radius to match your phone's camera punch hole</string>
+    <string name="calibration_desc">Adjust position and radius to match your phone\'s camera punch hole</string>
     
     <string name="pos_x">Center X Offset (px)</string>
     <string name="pos_y">Center Y Offset (px)</string>

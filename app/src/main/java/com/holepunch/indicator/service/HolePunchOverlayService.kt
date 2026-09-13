@@ -1,4 +1,4 @@
-﻿package com.holepunch.indicator.service
+package com.holepunch.indicator.service
 
 import android.annotation.SuppressLint
 import android.app.Notification
