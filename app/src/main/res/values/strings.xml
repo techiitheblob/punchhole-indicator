@@ -1,0 +1,25 @@
+﻿<resources>
+    <string name="app_name">PunchHole Indicator</string>
+    <string name="enable_service">Enable Indicator Overlay</string>
+    <string name="enable_service_desc">Draw status rings and dots around camera cutout</string>
+    <string name="permissions_title">Required Permissions</string>
+    <string name="overlay_perm_btn">Grant Overlay Permission</string>
+    <string name="battery_opt_btn">Disable Battery Optimization</string>
+    <string name="notification_perm_btn">Notification Permission</string>
+    <string name="bluetooth_perm_btn">Bluetooth Permission (Optional)</string>
+    
+    <string name="calibration_title">Camera Cutout Calibration</string>
+    <string name="calibration_desc">Adjust position and radius to match your phone's camera punch hole</string>
+    
+    <string name="pos_x">Center X Offset (px)</string>
+    <string name="pos_y">Center Y Offset (px)</string>
+    <string name="cutout_radius">Camera Cutout Radius (dp)</string>
+    <string name="ring_thickness">Ring Thickness (dp)</string>
+    <string name="ring_gap">Gap from Camera (dp)</string>
+    <string name="dot_radius">Status Dot Size (dp)</string>
+    <string name="dot_distance">Dot Distance (dp)</string>
+    <string name="dot_spread">Dot Arc Angle (deg)</string>
+
+    <string name="reset_defaults">Reset to Auto / Default</string>
+    <string name="test_mode">Preview Calibration Marks</string>
+</resources>

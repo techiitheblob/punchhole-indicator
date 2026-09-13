@@ -1,0 +1,33 @@
+﻿<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- App Theme Dark Colors -->
+    <color name="bg_dark">#121316</color>
+    <color name="card_dark">#1E2024</color>
+    <color name="card_stroke">#2D3139</color>
+    <color name="primary_accent">#4D96FF</color>
+    <color name="text_primary">#F1F3F5</color>
+    <color name="text_secondary">#9CA3AF</color>
+    <color name="success_green">#10B981</color>
+    <color name="warning_orange">#F59E0B</color>
+    <color name="error_red">#EF4444</color>
+
+    <!-- Overlay Ring & Dot Indicator Colors -->
+    <color name="indicator_track">#40333333</color>
+    <color name="indicator_battery_normal">#FFFFFFFF</color>
+    <color name="indicator_battery_charging">#00E676</color>
+    <color name="indicator_battery_low">#FF5252</color>
+    
+    <color name="dot_wifi_active">#2979FF</color>
+    <color name="dot_wifi_inactive">#332979FF</color>
+    
+    <color name="dot_cellular_active">#00E676</color>
+    <color name="dot_cellular_inactive">#3300E676</color>
+    
+    <color name="dot_bluetooth_active">#00B0FF</color>
+    <color name="dot_bluetooth_inactive">#3300B0FF</color>
+    
+    <color name="dot_silent_active">#FF9100</color>
+    <color name="dot_silent_inactive">#20FFFFFF</color>
+</resources>
